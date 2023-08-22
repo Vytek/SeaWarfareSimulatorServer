@@ -1,11 +1,13 @@
 package main
 
 import (
-	"log"
 	"fmt"
+	"log"
 
 	"github.com/tidwall/buntdb"
 )
+
+var db *buntdb.DB
 
 func main() {
 	// Open the data.db file. It will be created if it doesn't exist.
@@ -23,10 +25,18 @@ func main() {
 
 	err = db.View(func(tx *buntdb.Tx) error {
 		val, err := tx.Get("mykey")
-		if err != nil{
+		if err != nil {
 			return err
 		}
 		fmt.Printf("value is %s\n", val)
 		return nil
+	})
+
+	err = db.View(func(tx *buntdb.Tx) error {
+		err := tx.Ascend("", func(key, value string) bool {
+			fmt.Printf("key: %s, value: %s\n", key, value)
+			return true // continue iteration
+		})
+		return err
 	})
 }
